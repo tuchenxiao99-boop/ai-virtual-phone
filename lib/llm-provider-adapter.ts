@@ -527,6 +527,11 @@ function buildOpenAICompatibleRequest(
         body.max_completion_tokens = body.max_tokens;
         delete body.max_tokens;
     }
+    if (usesMaxCompletionTokens(config.defaultModel)) {
+        // GPT-5-family models only accept their default sampling values.
+        delete body.temperature;
+        delete body.top_p;
+    }
     if (
         options.maxTokens
         && options.maxTokens > 0
