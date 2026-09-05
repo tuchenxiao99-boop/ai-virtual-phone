@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useLayoutEffect, useCallback, useRef, createContext, type CSSProperties, type ReactNode } from "react";
-import { Activity, Check, ChevronRight, Clock, Database, FileText, Fingerprint, Globe, HardDrive, Image, Info, KeyRound, Laptop, Layers, Link2, Loader2, LogOut, MessageSquare, Mic, SlidersHorizontal, UserCircle, Wrench, X, CloudUpload } from "lucide-react";
+import { Activity, Brain, Check, ChevronRight, Clock, Database, FileText, Fingerprint, Globe, HardDrive, Image, Info, KeyRound, Laptop, Layers, Link2, Loader2, LogOut, MessageSquare, Mic, SlidersHorizontal, UserCircle, Wrench, X, CloudUpload } from "lucide-react";
 import { ConfirmDialog } from "./ui/modal";
 import { useAccount } from "@/lib/account-context";
 import { isSelfHostedModeEnabled } from "@/lib/self-hosting";
@@ -21,6 +21,7 @@ import { CloudServicesPage } from "./settings/cloud-services-setup";
 import { ToolboxSettings } from "./settings/toolbox-settings";
 import { ModerationCenter } from "./settings/moderation-center";
 import { AgentComputerSettings } from "./settings/agent-computer-settings";
+import { SharedMemorySettings } from "./settings/shared-memory-settings";
 import { fetchIsAdmin } from "@/lib/moderation-client";
 import { PageShell } from "./ui/page-shell";
 import { CardGrid, FeaturedCard, type CardItem, type FeaturedCardItem } from "./ui/card-grid";
@@ -56,6 +57,7 @@ type SubPage =
     | "weixin"
     | "toolbox"
     | "agentComputer"
+    | "sharedMemory"
     | "moderation"
     | "about";
 
@@ -72,6 +74,7 @@ const SETTINGS_MENU = [
     { id: "weixin", icon: MessageSquare, label: "微信接入", desc: "iLink Bot", iconColor: CONTENT_APP_ACCENTS.chat , glass: "weixin" },
     { id: "toolbox", icon: Wrench, label: "聊天工具箱", desc: "外部工具调用", iconColor: BINDING_ACCENTS.voice , glass: "toolbox" },
     { id: "agentComputer", icon: Laptop, label: "角色电脑", desc: "云端小电脑（自部署）", iconColor: BINDING_ACCENTS.memory , glass: "agent-computer" },
+    { id: "sharedMemory", icon: Brain, label: "共享记忆", desc: "与顾先生同步私人记忆", iconColor: BINDING_ACCENTS.memory, glass: "memory" },
     { id: "identity", icon: UserCircle, label: "用户身份", desc: "个人信息", iconColor: BINDING_ACCENTS.identity , glass: "identity" },
     { id: "about", icon: Info, label: "关于与声明", desc: "版本与协议", iconColor: BINDING_ACCENTS.memory , glass: "about" },
 ] as const;
@@ -277,6 +280,17 @@ export function PhoneSettingsApp({ onClose, onNotice }: SettingsPageProps) {
         onClick: () => setCurrentPage("agentComputer"),
     };
 
+    const sharedMemoryItem = SETTINGS_MENU.find(i => i.id === "sharedMemory")!;
+    const sharedMemoryFeaturedItem: FeaturedCardItem = {
+        id: sharedMemoryItem.id,
+        icon: sharedMemoryItem.icon,
+        label: sharedMemoryItem.label,
+        desc: sharedMemoryItem.desc,
+        iconColor: sharedMemoryItem.iconColor,
+        glassIcon: sharedMemoryItem.glass,
+        onClick: () => setCurrentPage("sharedMemory"),
+    };
+
     const bindingItem = SETTINGS_MENU.find(i => i.id === "binding")!;
     const bindingFeaturedItem: FeaturedCardItem = {
         id: bindingItem.id,
@@ -314,6 +328,8 @@ export function PhoneSettingsApp({ onClose, onNotice }: SettingsPageProps) {
                 return <ToolboxSettings />;
             case "agentComputer":
                 return <AgentComputerSettings onNotice={onNotice} />;
+            case "sharedMemory":
+                return <SharedMemorySettings onNotice={onNotice} />;
             case "moderation":
                 return <ModerationCenter onNotice={onNotice} />;
             case "identity":
@@ -417,6 +433,9 @@ export function PhoneSettingsApp({ onClose, onNotice }: SettingsPageProps) {
                             </div>
                             <div className="mt-[10px]">
                                 <FeaturedCard item={agentComputerFeaturedItem} />
+                            </div>
+                            <div className="mt-[10px]">
+                                <FeaturedCard item={sharedMemoryFeaturedItem} />
                             </div>
                         </div>
                         <div className="settings-realtime-section">
