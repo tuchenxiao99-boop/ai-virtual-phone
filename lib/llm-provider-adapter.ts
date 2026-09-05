@@ -7,6 +7,7 @@ import {
     isNativeAnthropicApi,
     isNativeGoogleApi,
     stripHallucinatedTimestamps,
+    usesMaxCompletionTokens,
 } from "./api-helpers";
 import { resolveEnabledGenerationParameters } from "./generation-parameters";
 
@@ -522,12 +523,19 @@ function buildOpenAICompatibleRequest(
         }),
         ...buildSamplingBody(preset),
     };
+    if (usesMaxCompletionTokens(config.defaultModel) && body.max_tokens !== undefined) {
+        body.max_completion_tokens = body.max_tokens;
+        delete body.max_tokens;
+    }
     if (
         options.maxTokens
         && options.maxTokens > 0
         && (!preset?.enabled_generation_parameters || resolveEnabledGenerationParameters(preset).has("max_tokens"))
     ) {
-        body.max_tokens = Math.floor(options.maxTokens);
+        const tokenLimitKey = usesMaxCompletionTokens(config.defaultModel)
+            ? "max_completion_tokens"
+            : "max_tokens";
+        body[tokenLimitKey] = Math.floor(options.maxTokens);
     }
     if (options.stream) body.stream = true;
     if (options.tools?.length) {
