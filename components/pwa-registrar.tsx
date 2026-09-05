@@ -1,9 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
+import { autoSyncSharedMemory } from "@/lib/shared-memory-sync";
 
 export function PWARegistrar() {
   useEffect(() => {
+    void autoSyncSharedMemory().catch((error) => {
+      console.warn("[SharedMemory] Auto sync failed:", error);
+    });
+
     if (process.env.NODE_ENV !== "production") return;
     if (!("serviceWorker" in navigator)) return;
 
