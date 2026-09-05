@@ -40,6 +40,11 @@ export function buildChatCompletionsUrl(baseUrl: string): string {
     return `${baseUrl.replace(/\/$/, "")}/chat/completions`;
 }
 
+/** GPT-5-family Chat Completions models reject the legacy max_tokens field. */
+export function usesMaxCompletionTokens(model: string): boolean {
+    return /^gpt-5(?:[.\-_]|$)/i.test(model.trim());
+}
+
 /**
  * Build request headers for an API config.
  * Handles provider-specific headers (OpenRouter, Anthropic, etc.)
@@ -148,11 +153,16 @@ export async function simpleLLMCall(
         } else {
             // OpenAI-compatible (all others including proxies/relays/custom)
             fetchUrl = buildChatCompletionsUrl(baseUrl);
+            const tokenLimit = max_tokens
+                ? usesMaxCompletionTokens(config.defaultModel)
+                    ? { max_completion_tokens: max_tokens }
+                    : { max_tokens }
+                : {};
             body = JSON.stringify({
                 model: config.defaultModel,
                 messages,
                 temperature,
-                ...(max_tokens ? { max_tokens } : {}),
+                ...tokenLimit,
             });
         }
 
