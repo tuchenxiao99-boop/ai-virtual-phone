@@ -544,6 +544,9 @@ function buildOpenAICompatibleRequest(
     }
     if (options.stream) body.stream = true;
     if (options.tools?.length) {
+        if (usesMaxCompletionTokens(config.defaultModel)) {
+            body.reasoning_effort = "none";
+        }
         body.tools = options.tools.map((tool) => ({
             type: "function",
             function: {
