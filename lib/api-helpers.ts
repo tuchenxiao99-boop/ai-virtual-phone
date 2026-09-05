@@ -161,7 +161,7 @@ export async function simpleLLMCall(
             body = JSON.stringify({
                 model: config.defaultModel,
                 messages,
-                temperature,
+                ...(usesMaxCompletionTokens(config.defaultModel) ? {} : { temperature }),
                 ...tokenLimit,
             });
         }
